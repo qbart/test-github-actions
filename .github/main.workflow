@@ -1,12 +1,27 @@
-workflow "Main" {
+workflow "Production" {
   on = "push"
-  resolves = ["Deploy to heroku"]
+  resolves = ["heroku.deploy"]
 }
 
-action "Deploy to heroku" {
-  uses = "actions/heroku@6db8f1c"
+action "heroku.deploy" {
+  uses = "actions/heroku@master"
+  needs = "heroku.push"
+  args = "container:release web"
+  secrets = ["HEROKU_API_KEY", "HEROKU_APP"]
   env = {
     RACK_ENV = "production"
   }
-  secrets = ["MY_SECRET"]
 }
+
+  action "heroku.push" {
+    uses = "actions/heroku@master"
+    needs = "heroku.login"
+    args = "container:push web"
+    secrets = ["HEROKU_API_KEY", "HEROKU_APP"]
+  }
+
+  action "heroku.login" {
+    uses = "actions/heroku@master"
+    args = "container:login"
+    secrets = ["HEROKU_API_KEY", "HEROKU_APP"]
+  }
