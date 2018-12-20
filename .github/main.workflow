@@ -1,6 +1,6 @@
 workflow "Test and deploy to heroku" {
-  on       = "push"
-  resolves = ["heroku.deploy"]
+  on = "push"
+  resolves = ["slack.notifier"]
 }
 
 action "ruby.build" {
@@ -27,60 +27,60 @@ action "git.master" {
 }
 
 action "heroku.login" {
-  uses    = "actions/heroku@master"
-  needs   = ["git.master"]
-  args    = "container:login"
+  uses = "actions/heroku@master"
+  needs = ["git.master"]
+  args = "container:login"
   secrets = ["HEROKU_API_KEY"]
 }
 
 action "heroku.push" {
-  uses  = "actions/heroku@master"
+  uses = "actions/heroku@master"
   needs = "heroku.login"
-  args  = ["container:push", "web"]
-
+  args = ["container:push", "web"]
   secrets = [
     "HEROKU_API_KEY",
-    "HEROKU_APP"
+    "HEROKU_APP",
   ]
-
   env = {
     RACK_ENV = "production"
   }
 }
 
 action "heroku.envs" {
-  uses  = "actions/heroku@master"
+  uses = "actions/heroku@master"
   needs = "heroku.push"
-
   args = [
     "config:set",
     "RACK_ENV=$RACK_ENV",
-    "MY_SECRET=$MY_SECRET"
+    "MY_SECRET=$MY_SECRET",
   ]
-
   secrets = [
     "HEROKU_API_KEY",
     "HEROKU_APP",
-    "MY_SECRET"
+    "MY_SECRET",
   ]
-
   env = {
     RACK_ENV = "production"
   }
 }
 
 action "heroku.deploy" {
-  uses  = "actions/heroku@master"
+  uses = "actions/heroku@master"
   needs = ["heroku.envs", "heroku.push"]
-  args  = ["container:release", "web"]
-
+  args = ["container:release", "web"]
   secrets = [
     "HEROKU_API_KEY",
     "HEROKU_APP",
-    "MY_SECRET"
+    "MY_SECRET",
   ]
-
   env = {
     RACK_ENV = "production"
   }
+}
+
+action "slack.notifier" {
+  uses = "./.github/slack"
+  needs = ["heroku.deploy"]
+  args = "Deployed!"
+  secrets = ["SLACK_WEBHOOK_URL"]
 }
