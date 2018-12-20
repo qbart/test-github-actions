@@ -1,0 +1,10 @@
+.dockerignore
+Dockerfile
+.git
+.vscode/
+logs/
+log/
+tmp/
+coverage/
+.env.*
+.overcommit.yml

@@ -1,0 +1,14 @@
+FROM ruby:2.5.1
+
+ENV RACK_ENV test
+ENV MY_SECRET 12345
+
+ENV APP_HOME /app
+
+RUN apt-get update -qq && apt-get install -y build-essential
+
+RUN mkdir $APP_HOME
+WORKDIR $APP_HOME
+ADD . $APP_HOME/
+
+RUN bundle install

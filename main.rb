@@ -1,5 +1,5 @@
 require 'sinatra'
 
 get '/' do
-  'Hello there! Testing GitHub Actions'
+  "#{ENV['RACK_ENV']}: Hello there! My secret is #{ENV['MY_SECRET']}"
 end
